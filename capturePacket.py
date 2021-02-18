@@ -6,24 +6,29 @@ def request(flow):
     # 获取请求对象
     request = flow.request
     # 实例化输出类
-    info = ctx.log.info
+    log = ctx.log
     # 打印请求的url
     # 实例化输出类
     filter_url='testapi.huxin315.com'
-    if request.host==filter_url:
-        info('host----'+request.url)
+    filter_url2 = 'api.huxin315.com'
+    filter_url3 = 'huxin315.com'
+    if filter_url3 in str(request.host):
+        log.info('host----'+request.url)
         with open(r'C:\Users\ZL-52S8FFG\Desktop\new2.csv', 'a', newline='', encoding='utf-8') as f2:
             csv_writer = csv.writer(f2)
-            csv_writer.writerow([request.url, request.host,request.port,request.headers,request.cookies,request.get_text()])
+            #发行计划，缴纳质保金，
+            header=request.headers;
+            if request.method!="OPTIONS":
+                csv_writer.writerow(["发行计划",request.path, request.host,request.method,header['authorization'],header['Content-Type'],request.get_text()])
             f2.close()
     # 打印请求方法
-        #info(request.method)
+        log.warn(request.method)
     # # 打印host头
-        info('host----'+request.host)
+        log.warn('host----'+request.host)
     # # 打印请求端口
-        #info(str(request.port))
+        log.warn('port----'+str(request.port))
     # # 打印所有请求头部
-        #info(str(request.headers))
+        #log.warn(str('headers----'+request.headers))
     # # 打印cookie头
         #info(str(request.cookies))
 
@@ -33,16 +38,16 @@ def response(flow):
     # 获取响应对象
     response = flow.response
     # 实例化输出类
-    info = ctx.log.info
-    with open(r'C:\Users\ZL-52S8FFG\Desktop\new2.csv', 'a', newline='', encoding='utf-8') as f2:
-        csv_writer = csv.writer(f2)
-        csv_writer.writerow([response.status_code, response.headers, response.cookies, response.text])
-        f2.close()
+    info = ctx.log.warn
+    # with open(r'C:\Users\ZL-52S8FFG\Desktop\new2.csv', 'a', newline='', encoding='utf-8') as f2:
+    #     csv_writer = csv.writer(f2)
+    #     csv_writer.writerow([response.status_code, response.headers, response.cookies, response.text])
+    #     f2.close()
     # 打印响应码
-    # info(str(response.status_code))
+    #info(str(response.status_code))
     # # 打印所有头部
-    # info(str(response.headers))
+    #info(str(response.headers))
     # # 打印cookie头部
-    # info(str(response.cookies))
+    #info(str(response.cookies))
     # 打印响应报文内容
     #info(str(response.text))
