@@ -13,6 +13,7 @@ class api:
         self.authoration = authoration
         self.content_type = content_type
         self.params = params
+        self.reponse=None
 
 
     def userApi(self):
@@ -20,21 +21,19 @@ class api:
         headers = {  # 设置http头部信息
             'Host': self.hostname,
             'Authorization': self.authoration,
-            'Content-Type': self.content_type,
+            'Content-Type': self.content_type
         }
-        print(url)
+
         # json格式
         if headers["Content-Type"].find('json') >= 0:
-            print(headers)
-            print(self.params)
-            results = requests.post(
-                url, headers=headers, json=self.params, timeout=1.5).text
+            params = json.loads(self.params)
+            self.reponse = requests.post(
+                url, headers=headers, json=params)
         else:
-            results = requests.post(
-                url, self.params, headers=headers, timeout=1.5).text
-        print(results)
-        return results
-        # self.assertResult(results)
+            self.reponse = requests.post(
+                url, self.params, headers=headers)
+
+        self.assertResult()
 
 #返回合同id
     def returnId(self, result):
@@ -50,7 +49,17 @@ class api:
 
 
 
-    # def assertResult(self,results):
+    def assertResult(self):
+        response=json.loads(self.reponse.text)
+        #print(type(self.reponse))
+        msg=response["msg"]
+        code = response["code"]
+        if self.reponse.status_code!=200:
+            print(self.path+"出错了")
+        elif code!=0:
+            print(self.path + "出错了")
+
+
 
 
 if __name__ == '__main__':
