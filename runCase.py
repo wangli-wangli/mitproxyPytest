@@ -35,20 +35,6 @@ class api:
 
         self.assertResult()
 
-#返回合同id
-    def returnId(self, result):
-        result_dic = json.loads(result)
-        code = result_dic['code']
-        results = result_dic['result']
-        msg = result_dic['msg']
-        ids=[]
-        for i in result:
-            if i.stateText=='已终止':
-                ids.append(id)
-        return ids
-
-
-
     def assertResult(self):
         response=json.loads(self.reponse.text)
         #print(type(self.reponse))

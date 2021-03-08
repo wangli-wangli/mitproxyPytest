@@ -14,7 +14,7 @@ def request(flow):
     filter_url3 = 'huxin315.com'
     if filter_url3 in str(request.host):
         log.info('host----'+request.url)
-        with open(r'C:\Users\ZL-52S8FFG\Desktop\new2.csv', 'a', newline='', encoding='utf-8') as f2:
+        with open(r'C:\Users\ZL-52S8FFG\Desktop\new3.csv', 'a', newline='', encoding='utf-8') as f2:
             csv_writer = csv.writer(f2)
             #发行计划，缴纳质保金，
             header=request.headers;

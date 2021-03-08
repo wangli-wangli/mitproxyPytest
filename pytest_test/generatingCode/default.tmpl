@@ -1,0 +1,26 @@
+@pytest.mark.${Tag}
+def test_${FunctionName}():
+    '''${Tag}'''
+    url = "https://${Hostname}${Path}"
+    headers = {  # 设置http头部信息
+        'Host': '${Hostname}',
+        'Authorization':'${Authoration}',
+        'Content-Type': '${Content_type}'
+    }
+    # json格式
+    if headers["Content-Type"].find('json') >= 0:
+        params='${Params}'
+        response = requests.post(
+            url, headers=headers, json=params)
+    else:
+        params='${Params}'
+        response = requests.post(
+            url, params, headers=headers)
+    response_text=response.text
+    response_json=json.loads(response_text)
+    msg = response_json["msg"]
+    code = response_json["code"]
+    assert response.status_code != 200
+    assert code != 0
+
+

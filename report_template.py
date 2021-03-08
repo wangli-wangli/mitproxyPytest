@@ -7,7 +7,7 @@ func_dict={"funcname":"模块1",}
 funcname=['书架','书城','分类','我的']
 case1={"name":"模块1","total":"10","passnum":"10","failnum":"0","radio":"80","status":"PASS"}
 case2={"name":"模块2","total":"20","passnum":"15","failnum":"5","radio":"75","status":"Fail"}
-
+case3={"name":"模块2","total":"20","passnum":"15","failnum":"5","radio":"75","status":"Fail"}
 VERSION_DICT={"version": '快看小说 3.8.8',"radio":'99',"runstarttime":time.strftime('%Y-%m-%d %H:%M:%S'),"runstoptime" : time.strftime('%Y-%m-%d %H:%M:%S')}
 
 
@@ -126,7 +126,5 @@ if __name__ == '__main__':
     #获取report的路径
     dir= os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'report')
     filename=os.path.join(dir,filename)
-    print(type(output))
-    #print(output)
     with open(filename, "a", encoding="utf-8") as file:
         file.write(output)
