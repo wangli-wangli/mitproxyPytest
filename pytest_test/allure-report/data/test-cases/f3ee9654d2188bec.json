@@ -1,0 +1,74 @@
+{
+  "uid" : "f3ee9654d2188bec",
+  "name" : "test_test_issuance_plan0",
+  "fullName" : "test_dir.test_api2#test_test_issuance_plan0",
+  "historyId" : "e205bab88637273ddfe4d811aaceacd9",
+  "time" : {
+    "start" : 1615286457735,
+    "stop" : 1615286457854,
+    "duration" : 119
+  },
+  "description" : "发行计划",
+  "descriptionHtml" : "<p>发行计划</p>\n",
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "tag",
+    "value" : "发行计划"
+  }, {
+    "name" : "parentSuite",
+    "value" : "test_dir"
+  }, {
+    "name" : "suite",
+    "value" : "test_api2"
+  }, {
+    "name" : "host",
+    "value" : "DESKTOP-9I2MPS0"
+  }, {
+    "name" : "thread",
+    "value" : "14648-MainThread"
+  }, {
+    "name" : "framework",
+    "value" : "pytest"
+  }, {
+    "name" : "language",
+    "value" : "cpython3"
+  }, {
+    "name" : "package",
+    "value" : "test_dir.test_api2"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ {
+      "uid" : "c99cd17398f5a0eb",
+      "status" : "passed",
+      "time" : {
+        "start" : 1615285689481,
+        "stop" : 1615285689568,
+        "duration" : 87
+      }
+    }, {
+      "uid" : "26bf68e57f2db863",
+      "status" : "passed",
+      "time" : {
+        "start" : 1615284243261,
+        "stop" : 1615284243370,
+        "duration" : 109
+      }
+    } ],
+    "categories" : [ ],
+    "tags" : [ "发行计划" ]
+  },
+  "source" : "f3ee9654d2188bec.json",
+  "parameterValues" : [ ]
+}

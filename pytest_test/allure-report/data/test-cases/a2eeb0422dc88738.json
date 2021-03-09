@@ -1,0 +1,56 @@
+{
+  "uid" : "a2eeb0422dc88738",
+  "name" : "test_test_issuance_plan11",
+  "fullName" : "test_dir.test_api2#test_test_issuance_plan11",
+  "historyId" : "3da7dfbf2ea570ed1ef740c00ca600a4",
+  "time" : {
+    "start" : 1615285690609,
+    "stop" : 1615285690714,
+    "duration" : 105
+  },
+  "description" : "发行计划",
+  "descriptionHtml" : "<p>发行计划</p>\n",
+  "status" : "passed",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "tag",
+    "value" : "发行计划"
+  }, {
+    "name" : "parentSuite",
+    "value" : "test_dir"
+  }, {
+    "name" : "suite",
+    "value" : "test_api2"
+  }, {
+    "name" : "host",
+    "value" : "DESKTOP-9I2MPS0"
+  }, {
+    "name" : "thread",
+    "value" : "7404-MainThread"
+  }, {
+    "name" : "framework",
+    "value" : "pytest"
+  }, {
+    "name" : "language",
+    "value" : "cpython3"
+  }, {
+    "name" : "package",
+    "value" : "test_dir.test_api2"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : true,
+  "retry" : true,
+  "extra" : {
+    "categories" : [ ],
+    "tags" : [ "发行计划" ]
+  },
+  "source" : "a2eeb0422dc88738.json",
+  "parameterValues" : [ ]
+}

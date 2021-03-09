@@ -1,7 +1,9 @@
 import pytest
 import json
 import requests
+import allure
 
+@pytest.mark.发行计划
 def test_api():
     url = "https://testapi.huxin315.com//cloud-service/api/merchant/myProject"
     headers = {  # 设置http头部信息
@@ -24,4 +26,6 @@ def test_api():
     code = response_json["code"]
     assert response.status_code != 200
     assert code != 0
+    allure.attach("请求参数:",params)
+    allure.attach("响应参数:",response_json)
 
