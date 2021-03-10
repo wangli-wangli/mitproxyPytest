@@ -1,0 +1,224 @@
+{
+  "uid" : "ee2d655621c9c4f6",
+  "name" : "test_test_issuance_plan0",
+  "fullName" : "test_dir.test_api2#test_test_issuance_plan0",
+  "historyId" : "e205bab88637273ddfe4d811aaceacd9",
+  "time" : {
+    "start" : 1615368738789,
+    "stop" : 1615368738887,
+    "duration" : 98
+  },
+  "description" : "发行计划",
+  "descriptionHtml" : "<p>发行计划</p>\n",
+  "status" : "failed",
+  "statusMessage" : "AssertionError: assert 401 == 200\n +  where 401 = <Response [401]>.status_code",
+  "statusTrace" : "@pytest.mark.发行计划\n    def test_test_issuance_plan0():\n        '''发行计划'''\n        url = \"https://testapi.huxin315.com/cloud-service/api/merchant/myProject\"\n        headers = {  # 设置http头部信息\n            'Host': 'testapi.huxin315.com',\n            'Authorization':'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA',\n            'Content-Type': 'application/json;charset=UTF-8'\n        }\n        params='{\"pageNum\":1}'\n        params_byte=json.dumps(params,indent=4).encode()\n        headers_bype=json.dumps(headers,indent=4).encode()\n        url_bype = url.encode()\n        send_request=interface(url,headers,params)\n        response=send_request.send_request()\n    \n        response_text=response.text\n        response_json=json.loads(response_text)\n        response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)\n        allure.attach(url_bype, \"url:\", allure.attachment_type.JSON)\n        allure.attach(headers_bype, \"headers:\", allure.attachment_type.JSON)\n        allure.attach(params_byte, \"请求参数:\", allure.attachment_type.JSON)\n        allure.attach(response_byte, \"响应参数:\", allure.attachment_type.JSON)\n        allure.attach(str(response.status_code).encode(), \"状态码:\", allure.attachment_type.JSON)\n        msg = response_json[\"msg\"]\n        code = response_json[\"code\"]\n        code_str=str(code)\n>       assert response.status_code == 200\nE       assert 401 == 200\nE        +  where 401 = <Response [401]>.status_code\n\ntest_dir\\test_api2.py:38: AssertionError",
+  "flaky" : false,
+  "newFailed" : false,
+  "beforeStages" : [ ],
+  "testStage" : {
+    "description" : "发行计划",
+    "status" : "failed",
+    "statusMessage" : "AssertionError: assert 401 == 200\n +  where 401 = <Response [401]>.status_code",
+    "statusTrace" : "@pytest.mark.发行计划\n    def test_test_issuance_plan0():\n        '''发行计划'''\n        url = \"https://testapi.huxin315.com/cloud-service/api/merchant/myProject\"\n        headers = {  # 设置http头部信息\n            'Host': 'testapi.huxin315.com',\n            'Authorization':'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA',\n            'Content-Type': 'application/json;charset=UTF-8'\n        }\n        params='{\"pageNum\":1}'\n        params_byte=json.dumps(params,indent=4).encode()\n        headers_bype=json.dumps(headers,indent=4).encode()\n        url_bype = url.encode()\n        send_request=interface(url,headers,params)\n        response=send_request.send_request()\n    \n        response_text=response.text\n        response_json=json.loads(response_text)\n        response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)\n        allure.attach(url_bype, \"url:\", allure.attachment_type.JSON)\n        allure.attach(headers_bype, \"headers:\", allure.attachment_type.JSON)\n        allure.attach(params_byte, \"请求参数:\", allure.attachment_type.JSON)\n        allure.attach(response_byte, \"响应参数:\", allure.attachment_type.JSON)\n        allure.attach(str(response.status_code).encode(), \"状态码:\", allure.attachment_type.JSON)\n        msg = response_json[\"msg\"]\n        code = response_json[\"code\"]\n        code_str=str(code)\n>       assert response.status_code == 200\nE       assert 401 == 200\nE        +  where 401 = <Response [401]>.status_code\n\ntest_dir\\test_api2.py:38: AssertionError",
+    "steps" : [ ],
+    "attachments" : [ {
+      "uid" : "8531101b6735fe85",
+      "name" : "url:",
+      "source" : "8531101b6735fe85.json",
+      "type" : "application/json",
+      "size" : 65
+    }, {
+      "uid" : "9033a04b6e2c0869",
+      "name" : "headers:",
+      "source" : "9033a04b6e2c0869.json",
+      "type" : "application/json",
+      "size" : 789
+    }, {
+      "uid" : "1852d117dd06b46d",
+      "name" : "请求参数:",
+      "source" : "1852d117dd06b46d.json",
+      "type" : "application/json",
+      "size" : 17
+    }, {
+      "uid" : "54777f4640165a4c",
+      "name" : "响应参数:",
+      "source" : "54777f4640165a4c.json",
+      "type" : "application/json",
+      "size" : 46
+    }, {
+      "uid" : "4a0dd7824b7b0f90",
+      "name" : "状态码:",
+      "source" : "4a0dd7824b7b0f90.json",
+      "type" : "application/json",
+      "size" : 3
+    } ],
+    "parameters" : [ ],
+    "attachmentsCount" : 5,
+    "shouldDisplayMessage" : true,
+    "stepsCount" : 0,
+    "hasContent" : true
+  },
+  "afterStages" : [ ],
+  "labels" : [ {
+    "name" : "tag",
+    "value" : "发行计划"
+  }, {
+    "name" : "parentSuite",
+    "value" : "test_dir"
+  }, {
+    "name" : "suite",
+    "value" : "test_api2"
+  }, {
+    "name" : "host",
+    "value" : "DESKTOP-9I2MPS0"
+  }, {
+    "name" : "thread",
+    "value" : "15856-MainThread"
+  }, {
+    "name" : "framework",
+    "value" : "pytest"
+  }, {
+    "name" : "language",
+    "value" : "cpython3"
+  }, {
+    "name" : "package",
+    "value" : "test_dir.test_api2"
+  }, {
+    "name" : "resultFormat",
+    "value" : "allure2"
+  } ],
+  "parameters" : [ ],
+  "links" : [ ],
+  "hidden" : false,
+  "retry" : false,
+  "extra" : {
+    "severity" : "normal",
+    "retries" : [ {
+      "uid" : "1bdaf91ab01818af",
+      "status" : "failed",
+      "statusDetails" : "AssertionError: assert 401 == 200\n +  where 401 = <Response [401]>.status_code",
+      "time" : {
+        "start" : 1615368524287,
+        "stop" : 1615368524423,
+        "duration" : 136
+      }
+    }, {
+      "uid" : "b6ac14462d32bb2f",
+      "status" : "failed",
+      "statusDetails" : "AssertionError: assert 401 == 200\n +  where 401 = <Response [401]>.status_code",
+      "time" : {
+        "start" : 1615368493921,
+        "stop" : 1615368494011,
+        "duration" : 90
+      }
+    }, {
+      "uid" : "22680abef9ddaf00",
+      "status" : "failed",
+      "statusDetails" : "AssertionError: assert 401 == 200\n +  where 401 = <Response [401]>.status_code",
+      "time" : {
+        "start" : 1615368393500,
+        "stop" : 1615368393590,
+        "duration" : 90
+      }
+    }, {
+      "uid" : "6969b02ba001fd46",
+      "status" : "failed",
+      "statusDetails" : "AssertionError: assert 401 == 200\n +  where 401 = <Response [401]>.status_code",
+      "time" : {
+        "start" : 1615368374392,
+        "stop" : 1615368374494,
+        "duration" : 102
+      }
+    }, {
+      "uid" : "ee3a9582773346c",
+      "status" : "failed",
+      "statusDetails" : "AssertionError: assert 401 == 200\n +  where 401 = <Response [401]>.status_code",
+      "time" : {
+        "start" : 1615368354593,
+        "stop" : 1615368354664,
+        "duration" : 71
+      }
+    }, {
+      "uid" : "73e7c20cd71ed833",
+      "status" : "failed",
+      "statusDetails" : "AssertionError: assert 401 == 200\n +  where 401 = <Response [401]>.status_code",
+      "time" : {
+        "start" : 1615368172722,
+        "stop" : 1615368172817,
+        "duration" : 95
+      }
+    }, {
+      "uid" : "7111427944a66925",
+      "status" : "failed",
+      "statusDetails" : "AssertionError: assert 401 == 200\n +  where 401 = <Response [401]>.status_code",
+      "time" : {
+        "start" : 1615368144880,
+        "stop" : 1615368144983,
+        "duration" : 103
+      }
+    }, {
+      "uid" : "935c78cad21e2bc0",
+      "status" : "failed",
+      "statusDetails" : "AssertionError: assert 401 == 200\n +  where 401 = <Response [401]>.status_code",
+      "time" : {
+        "start" : 1615368092163,
+        "stop" : 1615368092294,
+        "duration" : 131
+      }
+    }, {
+      "uid" : "41acd9a0e3dc17a2",
+      "status" : "failed",
+      "statusDetails" : "AssertionError: assert 401 == 200\n +  where 401 = <Response [401]>.status_code",
+      "time" : {
+        "start" : 1615367849146,
+        "stop" : 1615367849275,
+        "duration" : 129
+      }
+    }, {
+      "uid" : "a9a0019178d592f8",
+      "status" : "failed",
+      "statusDetails" : "AssertionError: assert 401 == 200\n +  where 401 = <Response [401]>.status_code",
+      "time" : {
+        "start" : 1615367816028,
+        "stop" : 1615367816127,
+        "duration" : 99
+      }
+    }, {
+      "uid" : "2428f461d357e43c",
+      "status" : "failed",
+      "statusDetails" : "AssertionError: assert 401 == 200\n +  where 401 = <Response [401]>.status_code",
+      "time" : {
+        "start" : 1615367725449,
+        "stop" : 1615367725533,
+        "duration" : 84
+      }
+    }, {
+      "uid" : "db2df91a1d779b7c",
+      "status" : "failed",
+      "statusDetails" : "AssertionError: assert 401 == 200\n +  where 401 = <Response [401]>.status_code",
+      "time" : {
+        "start" : 1615367662169,
+        "stop" : 1615367662285,
+        "duration" : 116
+      }
+    }, {
+      "uid" : "e498e77139da204",
+      "status" : "failed",
+      "statusDetails" : "AssertionError: assert 401 == 200\n +  where 401 = <Response [401]>.status_code",
+      "time" : {
+        "start" : 1615367451911,
+        "stop" : 1615367452015,
+        "duration" : 104
+      }
+    } ],
+    "categories" : [ {
+      "name" : "Product defects",
+      "matchedStatuses" : [ ],
+      "flaky" : false
+    } ],
+    "tags" : [ "发行计划" ]
+  },
+  "source" : "ee2d655621c9c4f6.json",
+  "parameterValues" : [ ]
+}

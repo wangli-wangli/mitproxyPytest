@@ -4,12 +4,12 @@ from translate import Translator
 class caseGenerator:
     def generate(self):
         # 模版文件
-        template_file = open(r'default.tmpl', 'r')
+        template_file = open(r'default.tmpl', 'r',encoding='utf-8')
         tmpl = Template(template_file.read())
         lines=[]
         file_name = '../test_dir/test_api2.py'
         file = open(file_name, 'a+', encoding='utf-8')
-        import_str=['import pytest\n','import json\n','import requests\n']
+        import_str=['import pytest\n','import json\n','import requests\n','import allure\n','from  sendRequest import interface\n']
         file.writelines(import_str)
         file.close()
         global num

@@ -2,6 +2,8 @@ import pytest
 import json
 import requests
 import allure
+from  sendRequest import interface
+
 
 @pytest.mark.发行计划
 def test_api():
@@ -12,20 +14,28 @@ def test_api():
         'Content-Type': 'application/json;charset=UTF-8'
     }
     params={"pageNum":1}
+    params_byte=json.dumps(params,indent=4).encode()
+    headers_bype=json.dumps(headers,indent=4).encode()
+    url_bype = url.encode()
+    send_request=interface(url,headers,params)
+    response=send_request.send_request()
 
-    # json格式
-    if headers["Content-Type"].find('json') >= 0:
-        response = requests.post(
-            url, headers=headers, json=params)
-    else:
-        response = requests.post(
-            url, params, headers=headers)
     response_text=response.text
     response_json=json.loads(response_text)
+    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
+    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
+    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
+    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
+    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
+    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
     msg = response_json["msg"]
     code = response_json["code"]
-    assert response.status_code != 200
-    assert code != 0
-    allure.attach("请求参数:",params)
-    allure.attach("响应参数:",response_json)
+    code_str=str(code)
+    assert response.status_code == 200
+    assert code_str != '0'
+    assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
+    assert code_str[0] != '4' #4xx-客户端错误：发生错误，客户端似乎有问题。
+    assert code_str[0] != '5' #5xx-服务器错误：服务器由于遇到错误而不能完成该请求。
+
+
 
