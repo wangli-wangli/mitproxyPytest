@@ -1,13 +1,7 @@
 import pytest
 import json
-import requests
-import allure
 from  sendRequest import interface
-import pytest
-import json
-import requests
-import allure
-from  sendRequest import interface
+from interface_parms import api_val
 @pytest.mark.发行计划
 def test_test_issuance_plan0():
     '''发行计划'''
@@ -18,23 +12,20 @@ def test_test_issuance_plan0():
         'Content-Type': 'application/json;charset=UTF-8'
     }
     params='{"pageNum":1}'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -53,23 +44,20 @@ def test_test_issuance_plan1():
         'Content-Type': 'application/json;charset=UTF-8'
     }
     params='{"pageNum":1,"authState":1}'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -88,23 +76,20 @@ def test_test_issuance_plan2():
         'Content-Type': 'application/json;charset=UTF-8'
     }
     params='{"pageNum":2,"authState":1}'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -123,23 +108,20 @@ def test_test_issuance_plan3():
         'Content-Type': 'application/json;charset=UTF-8'
     }
     params='{"pageNum":3,"authState":1}'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -158,23 +140,20 @@ def test_test_issuance_plan4():
         'Content-Type': 'application/json;charset=UTF-8'
     }
     params='{"pageNum":4,"authState":1}'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -193,23 +172,20 @@ def test_test_issuance_plan5():
         'Content-Type': 'application/json;charset=UTF-8'
     }
     params='{"entId":"d946d4eb4c6662628ddb21f3ff10729f","corBusiness":0}'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -228,23 +204,20 @@ def test_test_issuance_plan6():
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
     }
     params='entId=d946d4eb4c6662628ddb21f3ff10729f'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -263,23 +236,20 @@ def test_test_issuance_plan7():
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
     }
     params='entId=d946d4eb4c6662628ddb21f3ff10729f&isPro=true'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -298,23 +268,20 @@ def test_test_issuance_plan8():
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
     }
     params='argName=%E5%8F%91%E8%A1%8C%E8%AE%A1%E5%88%92%E6%89%BF%E8%AF%BA%E4%B9%A6&entId=d946d4eb4c6662628ddb21f3ff10729f'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -333,23 +300,20 @@ def test_test_issuance_plan9():
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
     }
     params='entno=123456789014632748'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -368,23 +332,20 @@ def test_test_issuance_plan10():
         'Content-Type': 'application/json;charset=UTF-8'
     }
     params='{"yfsProject":{"entId":"d946d4eb4c6662628ddb21f3ff10729f","proName":"【测试计划A】","startTime":1613577600000,"endTime":1646063999000,"serverStopTime":1646036784901,"joinIns":true,"isVoucher":false,"isDis":false,"prepaidLimit":"10","consume":3,"productForm":0,"useScope":0,"registered":0,"phoneNumbers":"jCOspwyLYVAJE9YCV9VXn0ORuLMSIgp/+84PI9Vs7umKHCl9wg/BebSeec/+I3Gb/U59SPVTGzRg8izgrwMSkvCIPAMRMlAkuXus/fBBVe3rT4Ayjltg0VitwBMTRlFyfvlTaGqGSH5QppBRr+Jq4GeW9sA/rfbIwd4vb5FXLDE=","verCode":"000000","proAbstract":"服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容","shopIds":["ebb6a3c3e82d13b73f97d3f0f224ce47"],"agrId":"cf17a89f131a86b97ce329d34745fa10","totalPri":"1000","lastUpdateTime":"2021-02-18T14:31:36"},"verCode":"000000"}'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -403,23 +364,20 @@ def test_test_issuance_plan11():
         'Content-Type': 'application/json;charset=UTF-8'
     }
     params='{"pageNum":1}'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -438,23 +396,20 @@ def test_test_issuance_plan12():
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
     }
     params='id=11b372274353e8b803690b63de70fe88'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -473,23 +428,20 @@ def test_test_issuance_plan13():
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
     }
     params='pageNum=1&proNo=ee495b-2021-ef6b'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -508,23 +460,20 @@ def test_test_issuance_plan14():
         'Content-Type': 'application/json;charset=UTF-8'
     }
     params='{"pageNum":1,"busiIds":"11b372274353e8b803690b63de70fe88","status":1}'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -543,23 +492,20 @@ def test_test_issuance_plan15():
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
     }
     params='id=cf17a89f131a86b97ce329d34745fa10'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。
@@ -578,23 +524,20 @@ def test_test_issuance_plan16():
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
     }
     params='entId=d946d4eb4c6662628ddb21f3ff10729f'
-    params_byte=json.dumps(params,indent=4).encode()
-    headers_bype=json.dumps(headers,indent=4).encode()
-    url_bype = url.encode()
     send_request=interface(url,headers,params)
     response=send_request.send_request()
 
     response_text=response.text
     response_json=json.loads(response_text)
-    response_byte = json.dumps(response_json, ensure_ascii=False,indent=4)
-    allure.attach(url_bype, "url:", allure.attachment_type.JSON)
-    allure.attach(headers_bype, "headers:", allure.attachment_type.JSON)
-    allure.attach(params_byte, "请求参数:", allure.attachment_type.JSON)
-    allure.attach(response_byte, "响应参数:", allure.attachment_type.JSON)
-    allure.attach(str(response.status_code).encode(), "状态码:", allure.attachment_type.JSON)
+    api_val.reponse = response_text
+    api_val.statue_code = response.status_code
+    api_val.url=url
+    api_val.request=params
+
     msg = response_json["msg"]
     code = response_json["code"]
     code_str=str(code)
+
     assert response.status_code == 200
     assert code_str != '0'
     assert code_str[0] !='3' #3xx-重定向：客户端浏览器必须采取更多操作来实现请求。

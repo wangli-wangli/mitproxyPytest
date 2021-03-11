@@ -9,7 +9,7 @@ class caseGenerator:
         lines=[]
         file_name = '../test_dir/test_api2.py'
         file = open(file_name, 'a+', encoding='utf-8')
-        import_str=['import pytest\n','import json\n','import requests\n','import allure\n','from  sendRequest import interface\n']
+        import_str=['import pytest\n','import json\n','from  sendRequest import interface\n','from interface_parms import api_val\n']
         file.writelines(import_str)
         file.close()
         global num
