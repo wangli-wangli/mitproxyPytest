@@ -14,7 +14,7 @@ def test_api():
         'Content-Type': 'application/json;charset=UTF-8'
     }
     params={"pageNum":1}
-    send_request=interface(url,headers,params)
+    send_request=interface(url,headers,params,'post')
     response=send_request.send_request()
 
     response_text=response.text

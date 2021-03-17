@@ -7,8 +7,9 @@ def test_${FunctionName}():
         'Authorization':'${Authoration}',
         'Content-Type': '${Content_type}'
     }
+    method='${method}'
     params='${Params}'
-    send_request=interface(url,headers,params)
+    send_request=interface(url,headers,params,method)
     response=send_request.send_request()
 
     response_text=response.text
