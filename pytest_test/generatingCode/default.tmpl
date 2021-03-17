@@ -17,6 +17,8 @@ def test_${FunctionName}():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]

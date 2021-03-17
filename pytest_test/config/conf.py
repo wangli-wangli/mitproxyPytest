@@ -18,7 +18,7 @@ subject='测试报告'
 #邮件正文
 contents='正文'
 #报告名称
-htmlName =reportDir+"\\"+now_time+"report.html"
+htmlName =reportDir+"\\"+now_time+"report.log"
 
 #脚本执行命令
-args='pytest --html='+htmlName
+args=' --resultlog='+htmlName

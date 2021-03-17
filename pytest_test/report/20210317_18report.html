@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Test Report</title>
+    <link href="assets/style.css" rel="stylesheet" type="text/css"/></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) { // eslint-disable-line no-redeclare
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function findAll(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sortColumn(elem) {
+    toggleSortStates(elem);
+    const colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    let key;
+    if (elem.classList.contains('result')) {
+        key = keyResult;
+    } else if (elem.classList.contains('links')) {
+        key = keyLink;
+    } else {
+        key = keyAlpha;
+    }
+    sortTable(elem, key(colIndex));
+}
+
+function showAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(showExtras);
+}
+
+function hideAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(hideExtras);
+}
+
+function showExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.remove('collapsed');
+    expandcollapse.classList.remove('expander');
+    expandcollapse.classList.add('collapser');
+}
+
+function hideExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.add('collapsed');
+    expandcollapse.classList.remove('collapser');
+    expandcollapse.classList.add('expander');
+}
+
+function showFilters() {
+    const filterItems = document.getElementsByClassName('filter');
+    for (let i = 0; i < filterItems.length; i++)
+        filterItems[i].hidden = false;
+}
+
+function addCollapse() {
+    // Add links for show/hide all
+    const resulttable = find('table#results-table');
+    const showhideall = document.createElement('p');
+    showhideall.innerHTML = '<a href="javascript:showAllExtras()">Show all details</a> / ' +
+                            '<a href="javascript:hideAllExtras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    findAll('.col-result').forEach(function(elem) {
+        const collapsed = getQueryParameter('collapsed') || 'Passed';
+        const extras = elem.parentNode.nextElementSibling;
+        const expandcollapse = document.createElement('span');
+        if (extras.classList.contains('collapsed')) {
+            expandcollapse.classList.add('expander');
+        } else if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add('collapsed');
+            expandcollapse.classList.add('expander');
+        } else {
+            expandcollapse.classList.add('collapser');
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener('click', function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains('collapsed')) {
+                showExtras(event.currentTarget);
+            } else {
+                hideExtras(event.currentTarget);
+            }
+        });
+    });
+}
+
+function getQueryParameter(name) {
+    const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () { // eslint-disable-line no-unused-vars
+    resetSortHeaders();
+
+    addCollapse();
+
+    showFilters();
+
+    sortColumn(find('.initial-sort'));
+
+    findAll('.sortable').forEach(function(elem) {
+        elem.addEventListener('click',
+            function() {
+                sortColumn(elem);
+            }, false);
+    });
+}
+
+function sortTable(clicked, keyFunc) {
+    const rows = findAll('.results-table-row');
+    const reversed = !clicked.classList.contains('asc');
+    const sortedRows = sort(rows, keyFunc, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    const thead = document.getElementById('results-table-head');
+    document.getElementById('results-table').remove();
+    const parent = document.createElement('table');
+    parent.id = 'results-table';
+    parent.appendChild(thead);
+    sortedRows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName('BODY')[0].appendChild(parent);
+}
+
+function sort(items, keyFunc, reversed) {
+    const sortArray = items.map(function(item, i) {
+        return [keyFunc(item), i];
+    });
+
+    sortArray.sort(function(a, b) {
+        const keyA = a[0];
+        const keyB = b[0];
+
+        if (keyA == keyB) return 0;
+
+        if (reversed) {
+            return keyA < keyB ? 1 : -1;
+        } else {
+            return keyA > keyB ? 1 : -1;
+        }
+    });
+
+    return sortArray.map(function(item) {
+        const index = item[1];
+        return items[index];
+    });
+}
+
+function keyAlpha(colIndex) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[colIndex].firstChild.data.toLowerCase();
+    };
+}
+
+function keyLink(colIndex) {
+    return function(elem) {
+        const dataCell = elem.childNodes[1].childNodes[colIndex].firstChild;
+        return dataCell == null ? '' : dataCell.innerText.toLowerCase();
+    };
+}
+
+function keyResult(colIndex) {
+    return function(elem) {
+        const strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+            'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[colIndex].firstChild.data);
+    };
+}
+
+function resetSortHeaders() {
+    findAll('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    findAll('.sortable').forEach(function(elem) {
+        const icon = document.createElement('div');
+        icon.className = 'sort-icon';
+        icon.textContent = 'vvv';
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove('desc', 'active');
+        elem.classList.add('asc', 'inactive');
+    });
+}
+
+function toggleSortStates(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        resetSortHeaders();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function isAllRowsHidden(value) {
+    return value.hidden == false;
+}
+
+function filterTable(elem) { // eslint-disable-line no-unused-vars
+    const outcomeAtt = 'data-test-result';
+    const outcome = elem.getAttribute(outcomeAtt);
+    const classOutcome = outcome + ' results-table-row';
+    const outcomeRows = document.getElementsByClassName(classOutcome);
+
+    for(let i = 0; i < outcomeRows.length; i++){
+        outcomeRows[i].hidden = !elem.checked;
+    }
+
+    const rows = findAll('.results-table-row').filter(isAllRowsHidden);
+    const allRowsHidden = rows.length == 0 ? true : false;
+    const notFoundMessage = document.getElementById('not-found-message');
+    notFoundMessage.hidden = !allRowsHidden;
+}
+</script>
+    <h1>20210317_18report.html</h1>
+    <p>Report generated on 17-Mar-2021 at 18:11:41 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
+    <h2>Environment</h2>
+    <table id="environment">
+      <tr>
+        <td>JAVA_HOME</td>
+        <td>C:\Program Files\Java\jdk1.8.0_201</td></tr>
+      <tr>
+        <td>Packages</td>
+        <td>{"pluggy": "0.13.1", "py": "1.10.0", "pytest": "6.2.2"}</td></tr>
+      <tr>
+        <td>Platform</td>
+        <td>Windows-10-10.0.18362-SP0</td></tr>
+      <tr>
+        <td>Plugins</td>
+        <td>{"html": "3.1.1", "metadata": "1.11.0"}</td></tr>
+      <tr>
+        <td>Python</td>
+        <td>3.6.7</td></tr></table>
+    <h2>Summary</h2>
+    <p>18 tests ran in 2.88 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">0 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">18 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th>模块</th>
+          <th>状态码</th>
+          <th>url</th>
+          <th>响应参数</th>
+          <th class="json">请求参数</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable" col="duration">Duration</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="8">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>None</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api.py::test_api</td>
+          <td class="col-duration">0.45</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_api():<br/>        url = &quot;https://testapi.huxin315.com//cloud-service/api/merchant/myProject&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;: &#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE3MDIyODc4NTMsInVzZXJJZCI6ImJtZnk1eGFhSU1uUkdQa3dvR0VXTkNITEhmeFkyUW8wL2sxN0NwWGRLQ3dzbmc3RVhhaHdBbWlnUG5FOWl5VkF2YTBrR2NpeVQ0VjJEYTh2U20rQndzc2lxeGhQNHZXT3RnYys2VnR4Wng5TXV1a3lua29WK3FoOWhEaklGSVN3dEF0T29EL1FIV04xTGV4QnhlTForbjhEaWI1NlZ5akhGUkwzZDhEU2hlST0iLCJpYXQiOjE2MTU5NzQyNTN9.vi-vY0wEVAll1MWTZ4A5G6KKkDbnEBuDB2qZkyGc6fBcq8CzUIQiK7H5WspcQOESVYV-od9a-6-BVxGPgJDGd5zreiT--dUWoOkZ7TCq8pShIaOj1nVafKBWkMEiT5UdO4Cojmb9P0Svnmp7KltZbx43fINH4cMgBDnpGZnpcjIS_u-9vQd3ld76a4cR_adrOmr8zcJ9wcndQetaqdNmQCfbjIRqMaEPzzP2HrvfIrrK7wbitrx7F0JA6zbAEbpaR2Oa0qj-_CFQjYeNYiST7vG0Dl7LhWOJHSST5hAl8DG5HXKoBK8s1CAt1TYWcfmyi-6sZBAN_Z4ti7S5yqc-Wg&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/json;charset=UTF-8&#x27;<br/>        }<br/>        params={&quot;pageNum&quot;:1}<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>    <br/>    <br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>        assert response.status_code == 200<br/>&gt;       assert code_str != &#x27;0&#x27;<br/><span class="error">E       AssertionError: assert &#x27;0&#x27; != &#x27;0&#x27;</span><br/><br/>test_dir\test_api.py:35: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;success&quot;,&quot;result&quot;:{&quot;records&quot;:[{&quot;agrId&quot;:&quot;cf17a89f131a86b97ce329d34745fa10&quot;,&quot;productForm&quot;:0,&quot;singleCardMin&quot;:1.00,&quot;lastSecId&quot;:&quot;7694045f24c686d11c620d634e390b99&quot;,&quot;icon&quot;:null,&quot;insSecurity&quot;:&quot;1&quot;,&quot;registered&quot;:0,&quot;consume&quot;:0,&quot;creTime&quot;:1615802910000,&quot;phoneNumbers&quot;:&quot;15176128570&quot;,&quot;proNo&quot;:&quot;0d4b24-2021-e2a2&quot;,&quot;singleCardNum&quot;:null,&quot;totalPri&quot;:null,&quot;useMoney&quot;:0.899900,&quot;startTime&quot;:1615737600000,&quot;qadRate&quot;:0.05,&quot;proName&quot;:&quot;作业帮测试产品 &quot;,&quot;projectIntro&quot;:null,&quot;joinIns&quot;:true,&quot;creUserId&quot;:&quot;977d720feafffcc07bce67397e9272f6&quot;,&quot;useScope&quot;:0,&quot;entId&quot;:&quot;11f73462416324d3176e6ce5cca7992b&quot;,&quot;unitPri&quot;:null,&quot;singleCardMax&quot;:1000.00,&quot;prepaidLimit&quot;:70.00,&quot;merProId&quot;:&quot;0d4b24-2021-e2a2&quot;,&quot;proId&quot;:&quot;19b8cafdfb1533150848c274f0fd8055&quot;,&quot;isDis&quot;:1,&quot;contractNum&quot;:6,&quot;endTime&quot;:1648742399000,&quot;proAbstract&quot;:&quot;服务内容&quot;,&quot;isVoucher&quot;:true,&quot;contacts&quot;:null,&quot;status&quot;:1,&quot;lastUpdateTime&quot;:1615802910000},{&quot;agrId&quot;:&quot;083976e3bbe403375e9f128028504eb1&quot;,&quot;productForm&quot;:0,&quot;singleCardMin&quot;:1.00,&quot;lastSecId&quot;:&quot;7dcd795cab830c2446675ac8b54c5281&quot;,&quot;icon&quot;:null,&quot;insSecurity&quot;:&quot;1&quot;,&quot;registered&quot;:0,&quot;consume&quot;:0,&quot;creTime&quot;:1615776467000,&quot;phoneNumbers&quot;:&quot;15176128570&quot;,&quot;proNo&quot;:&quot;af417e-2021-9882&quot;,&quot;singleCardNum&quot;:null,&quot;totalPri&quot;:null,&quot;useMoney&quot;:0.000000,&quot;startTime&quot;:1615737600000,&quot;qadRate&quot;:0.05,&quot;proName&quot;:&quot;测试产品合同模板&quot;,&quot;projectIntro&quot;:null,&quot;joinIns&quot;:true,&quot;creUserId&quot;:&quot;977d720feafffcc07bce67397e9272f6&quot;,&quot;useScope&quot;:0,&quot;entId&quot;:&quot;d946d4eb4c6662628ddb21f3ff10729f&quot;,&quot;unitPri&quot;:null,&quot;singleCardMax&quot;:1000.00,&quot;prepaidLimit&quot;:70.00,&quot;merProId&quot;:&quot;af417e-2021-9882&quot;,&quot;proId&quot;:&quot;68c9ecff0184c9595efdc935a3f3f1a7&quot;,&quot;isDis&quot;:1,&quot;contractNum&quot;:0,&quot;endTime&quot;:1648742399000,&quot;proAbstract&quot;:&quot;服务内容\n&quot;,&quot;isVoucher&quot;:true,&quot;contacts&quot;:null,&quot;status&quot;:1,&quot;lastUpdateTime&quot;:1615776467000},{&quot;agrId&quot;:&quot;cf17a89f131a86b97ce329d34745fa10&quot;,&quot;productForm&quot;:1,&quot;singleCardMin&quot;:10.00,&quot;lastSecId&quot;:&quot;25aa92d119fe5395ec8dc8d9fdea2a27&quot;,&quot;icon&quot;:&quot;/profit/7005fb278f6519611581796b737ee96c.jpg&quot;,&quot;insSecurity&quot;:&quot;1&quot;,&quot;registered&quot;:0,&quot;consume&quot;:0,&quot;creTime&quot;:1615278714000,&quot;phoneNumbers&quot;:&quot;15176128570&quot;,&quot;proNo&quot;:&quot;2a435e-2021-b7f7&quot;,&quot;singleCardNum&quot;:null,&quot;totalPri&quot;:null,&quot;useMoney&quot;:0.519900,&quot;startTime&quot;:1615219200000,&quot;qadRate&quot;:0.05,&quot;proName&quot;:&quot;累计金额&quot;,&quot;projectIntro&quot;:null,&quot;joinIns&quot;:true,&quot;creUserId&quot;:&quot;977d720feafffcc07bce67397e9272f6&quot;,&quot;useScope&quot;:0,&quot;entId&quot;:&quot;d946d4eb4c6662628ddb21f3ff10729f&quot;,&quot;unitPri&quot;:null,&quot;singleCardMax&quot;:10000.00,&quot;prepaidLimit&quot;:105.00,&quot;merProId&quot;:&quot;2a435e-2021-b7f7&quot;,&quot;proId&quot;:&quot;7005fb278f6519611581796b737ee96c&quot;,&quot;isDis&quot;:1,&quot;contractNum&quot;:2,&quot;endTime&quot;:1617206399000,&quot;proAbstract&quot;:&quot;服务内容\n&quot;,&quot;isVoucher&quot;:true,&quot;contacts&quot;:null,&quot;status&quot;:1,&quot;lastUpdateTime&quot;:1615537699000},{&quot;agrId&quot;:&quot;cf17a89f131a86b97ce329d34745fa10&quot;,&quot;productForm&quot;:0,&quot;singleCardMin&quot;:null,&quot;lastSecId&quot;:&quot;a94581e09dd8cef088a2bdeb62aea4df&quot;,&quot;icon&quot;:null,&quot;insSecurity&quot;:&quot;1&quot;,&quot;registered&quot;:0,&quot;consume&quot;:2,&quot;creTime&quot;:1615278093000,&quot;phoneNumbers&quot;:&quot;15176128570&quot;,&quot;proNo&quot;:&quot;a74849-2021-b3f5&quot;,&quot;singleCardNum&quot;:1,&quot;totalPri&quot;:null,&quot;useMoney&quot;:0.639900,&quot;startTime&quot;:1615219200000,&quot;qadRate&quot;:0.05,&quot;proName&quot;:&quot;计时消费&quot;,&quot;projectIntro&quot;:null,&quot;joinIns&quot;:true,&quot;creUserId&quot;:&quot;977d720feafffcc07bce67397e9272f6&quot;,&quot;useScope&quot;:0,&quot;entId&quot;:&quot;d946d4eb4c6662628ddb21f3ff10729f&quot;,&quot;unitPri&quot;:10.00,&quot;singleCardMax&quot;:null,&quot;prepaidLimit&quot;:11.00,&quot;merProId&quot;:&quot;a74849-2021-b3f5&quot;,&quot;proId&quot;:&quot;f0ccd4b370575333e1b8ca2b4e8f38d3&quot;,&quot;isDis&quot;:1,&quot;contractNum&quot;:3,&quot;endTime&quot;:1617206399000,&quot;proAbstract&quot;:&quot;服务内容\n&quot;,&quot;isVoucher&quot;:true,&quot;contacts&quot;:null,&quot;status&quot;:1,&quot;lastUpdateTime&quot;:1615428908000},{&quot;agrId&quot;:&quot;cf17a89f131a86b97ce329d34745fa10&quot;,&quot;productForm&quot;:0,&quot;singleCardMin&quot;:null,&quot;lastSecId&quot;:&quot;2f7960a4c5a2a12a66e3af819a1faa20&quot;,&quot;icon&quot;:null,&quot;insSecurity&quot;:&quot;1&quot;,&quot;registered&quot;:0,&quot;consume&quot;:1,&quot;creTime&quot;:1615276990000,&quot;phoneNumbers&quot;:&quot;15176128570&quot;,&quot;proNo&quot;:&quot;684fad-2021-7a0c&quot;,&quot;singleCardNum&quot;:1,&quot;totalPri&quot;:null,&quot;useMoney&quot;:0.720000,&quot;startTime&quot;:1615219200000,&quot;qadRate&quot;:0.05,&quot;proName&quot;:&quot;计次消费&quot;,&quot;projectIntro&quot;:null,&quot;joinIns&quot;:true,&quot;creUserId&quot;:&quot;977d720feafffcc07bce67397e9272f6&quot;,&quot;useScope&quot;:0,&quot;entId&quot;:&quot;d946d4eb4c6662628ddb21f3ff10729f&quot;,&quot;unitPri&quot;:10.00,&quot;singleCardMax&quot;:null,&quot;prepaidLimit&quot;:10.00,&quot;merProId&quot;:&quot;684fad-2021-7a0c&quot;,&quot;proId&quot;:&quot;3d37505613206063b721f7a970442536&quot;,&quot;isDis&quot;:1,&quot;contractNum&quot;:6,&quot;endTime&quot;:1648742399000,&quot;proAbstract&quot;:&quot;服务内容\n&quot;,&quot;isVoucher&quot;:true,&quot;contacts&quot;:null,&quot;status&quot;:1,&quot;lastUpdateTime&quot;:1615276990000},{&quot;agrId&quot;:&quot;cf17a89f131a86b97ce329d34745fa10&quot;,&quot;productForm&quot;:1,&quot;singleCardMin&quot;:null,&quot;lastSecId&quot;:&quot;3557e6336c244495f11bdcd47ef5f3ae&quot;,&quot;icon&quot;:null,&quot;insSecurity&quot;:&quot;1&quot;,&quot;registered&quot;:0,&quot;consume&quot;:3,&quot;creTime&quot;:1615273073000,&quot;phoneNumbers&quot;:&quot;15176128570&quot;,&quot;proNo&quot;:&quot;514a7c-2021-73c4&quot;,&quot;singleCardNum&quot;:null,&quot;totalPri&quot;:1200.0,&quot;useMoney&quot;:0.240000,&quot;startTime&quot;:1615219200000,&quot;qadRate&quot;:0.05,&quot;proName&quot;:&quot;添加消费记录测试B&quot;,&quot;projectIntro&quot;:null,&quot;joinIns&quot;:true,&quot;creUserId&quot;:&quot;977d720feafffcc07bce67397e9272f6&quot;,&quot;useScope&quot;:1,&quot;entId&quot;:&quot;d946d4eb4c6662628ddb21f3ff10729f&quot;,&quot;unitPri&quot;:null,&quot;singleCardMax&quot;:null,&quot;prepaidLimit&quot;:10.00,&quot;merProId&quot;:&quot;514a7c-2021-73c4&quot;,&quot;proId&quot;:&quot;292146d21daf92e4f844af929fc5b2f0&quot;,&quot;isDis&quot;:1,&quot;contractNum&quot;:2,&quot;endTime&quot;:1648742399000,&quot;proAbstract&quot;:&quot;服务内容\n&quot;,&quot;isVoucher&quot;:true,&quot;contacts&quot;:null,&quot;status&quot;:1,&quot;lastUpdateTime&quot;:1615273073000},{&quot;agrId&quot;:&quot;cf17a89f131a86b97ce329d34745fa10&quot;,&quot;productForm&quot;:0,&quot;singleCardMin&quot;:10.00,&quot;lastSecId&quot;:&quot;5ebd674efa94685333957f26a7319a13&quot;,&quot;icon&quot;:null,&quot;insSecurity&quot;:&quot;1&quot;,&quot;registered&quot;:0,&quot;consume&quot;:0,&quot;creTime&quot;:1615269697000,&quot;phoneNumbers&quot;:&quot;15176128570&quot;,&quot;proNo&quot;:&quot;354fc1-2021-b161&quot;,&quot;singleCardNum&quot;:null,&quot;totalPri&quot;:null,&quot;useMoney&quot;:0.180000,&quot;startTime&quot;:1615219200000,&quot;qadRate&quot;:0.05,&quot;proName&quot;:&quot;添加消费记录测试A&quot;,&quot;projectIntro&quot;:null,&quot;joinIns&quot;:true,&quot;creUserId&quot;:&quot;977d720feafffcc07bce67397e9272f6&quot;,&quot;useScope&quot;:1,&quot;entId&quot;:&quot;d946d4eb4c6662628ddb21f3ff10729f&quot;,&quot;unitPri&quot;:null,&quot;singleCardMax&quot;:1000.00,&quot;prepaidLimit&quot;:12.00,&quot;merProId&quot;:&quot;354fc1-2021-b161&quot;,&quot;proId&quot;:&quot;8473954435a1b238ed810348c3c1698c&quot;,&quot;isDis&quot;:1,&quot;contractNum&quot;:4,&quot;endTime&quot;:1646841599000,&quot;proAbstract&quot;:&quot;服务内容&quot;,&quot;isVoucher&quot;:true,&quot;contacts&quot;:null,&quot;status&quot;:1,&quot;lastUpdateTime&quot;:1615269925000},{&quot;agrId&quot;:&quot;cf17a89f131a86b97ce329d34745fa10&quot;,&quot;productForm&quot;:0,&quot;singleCardMin&quot;:1.00,&quot;lastSecId&quot;:&quot;fb26e74c581f5b17ff8ba9eb4b122580&quot;,&quot;icon&quot;:&quot;/profit/6f3e05547b9a34b3c2280685e4460ecf.JPG&quot;,&quot;insSecurity&quot;:&quot;1&quot;,&quot;registered&quot;:0,&quot;consume&quot;:0,&quot;creTime&quot;:1614845357000,&quot;phoneNumbers&quot;:&quot;15176128570&quot;,&quot;proNo&quot;:&quot;94402e-2021-c5e5&quot;,&quot;singleCardNum&quot;:null,&quot;totalPri&quot;:null,&quot;useMoney&quot;:0.005000,&quot;startTime&quot;:1614787200000,&quot;qadRate&quot;:0.05,&quot;proName&quot;:&quot;【测试计划  测试计划】&quot;,&quot;projectIntro&quot;:null,&quot;joinIns&quot;:true,&quot;creUserId&quot;:&quot;977d720feafffcc07bce67397e9272f6&quot;,&quot;useScope&quot;:0,&quot;entId&quot;:&quot;d946d4eb4c6662628ddb21f3ff10729f&quot;,&quot;unitPri&quot;:null,&quot;singleCardMax&quot;:1000.00,&quot;prepaidLimit&quot;:10.00,&quot;merProId&quot;:&quot;94402e-2021-c5e5&quot;,&quot;proId&quot;:&quot;6f3e05547b9a34b3c2280685e4460ecf&quot;,&quot;isDis&quot;:0,&quot;contractNum&quot;:0,&quot;endTime&quot;:1617206399000,&quot;proAbstract&quot;:&quot;服务内容\n服务内容\n服务内容\n服务内容\n服务内容\n服务内容\n服务内容\n服务内容\n服务内容\n&quot;,&quot;isVoucher&quot;:false,&quot;contacts&quot;:null,&quot;status&quot;:1,&quot;lastUpdateTime&quot;:1614845358000},{&quot;agrId&quot;:&quot;cf17a89f131a86b97ce329d34745fa10&quot;,&quot;productForm&quot;:0,&quot;singleCardMin&quot;:1.00,&quot;lastSecId&quot;:&quot;3c2d020002123da98a7d16dbefd28255&quot;,&quot;icon&quot;:&quot;/profit/0010c12ee49f6c6b2bd74154525d9893.jpg&quot;,&quot;insSecurity&quot;:&quot;1&quot;,&quot;registered&quot;:0,&quot;consume&quot;:0,&quot;creTime&quot;:1614843675000,&quot;phoneNumbers&quot;:&quot;15176128570&quot;,&quot;proNo&quot;:&quot;3342bd-2021-d88a&quot;,&quot;singleCardNum&quot;:null,&quot;totalPri&quot;:null,&quot;useMoney&quot;:0.010000,&quot;startTime&quot;:1614787200000,&quot;qadRate&quot;:0.05,&quot;proName&quot;:&quot;【测试计划EE】&quot;,&quot;projectIntro&quot;:null,&quot;joinIns&quot;:true,&quot;creUserId&quot;:&quot;977d720feafffcc07bce67397e9272f6&quot;,&quot;useScope&quot;:0,&quot;entId&quot;:&quot;d946d4eb4c6662628ddb21f3ff10729f&quot;,&quot;unitPri&quot;:null,&quot;singleCardMax&quot;:1000.00,&quot;prepaidLimit&quot;:10.00,&quot;merProId&quot;:&quot;3342bd-2021-d88a&quot;,&quot;proId&quot;:&quot;0010c12ee49f6c6b2bd74154525d9893&quot;,&quot;isDis&quot;:1,&quot;contractNum&quot;:0,&quot;endTime&quot;:1617206399000,&quot;proAbstract&quot;:&quot;服务内容服务内容\n\n&quot;,&quot;isVoucher&quot;:true,&quot;contacts&quot;:null,&quot;status&quot;:1,&quot;lastUpdateTime&quot;:1614843676000},{&quot;agrId&quot;:&quot;cf17a89f131a86b97ce329d34745fa10&quot;,&quot;productForm&quot;:0,&quot;singleCardMin&quot;:1.00,&quot;lastSecId&quot;:&quot;12cf83444d9d3094245013d4b764c2d6&quot;,&quot;icon&quot;:null,&quot;insSecurity&quot;:&quot;1&quot;,&quot;registered&quot;:0,&quot;consume&quot;:0,&quot;creTime&quot;:1614830358000,&quot;phoneNumbers&quot;:&quot;15176128570&quot;,&quot;proNo&quot;:&quot;fc43f7-2021-298a&quot;,&quot;singleCardNum&quot;:null,&quot;totalPri&quot;:null,&quot;useMoney&quot;:0.030000,&quot;startTime&quot;:1614787200000,&quot;qadRate&quot;:0.05,&quot;proName&quot;:&quot;【测试计划DD】&quot;,&quot;projectIntro&quot;:null,&quot;joinIns&quot;:true,&quot;creUserId&quot;:&quot;977d720feafffcc07bce67397e9272f6&quot;,&quot;useScope&quot;:0,&quot;entId&quot;:&quot;d946d4eb4c6662628ddb21f3ff10729f&quot;,&quot;unitPri&quot;:null,&quot;singleCardMax&quot;:1000.00,&quot;prepaidLimit&quot;:10.00,&quot;merProId&quot;:&quot;fc43f7-2021-298a&quot;,&quot;proId&quot;:&quot;32afb7879012bd93c4774550ca2a2d32&quot;,&quot;isDis&quot;:0,&quot;contractNum&quot;:0,&quot;endTime&quot;:1648742399000,&quot;proAbstract&quot;:&quot;服务内容&quot;,&quot;isVoucher&quot;:false,&quot;contacts&quot;:null,&quot;status&quot;:1,&quot;lastUpdateTime&quot;:1614830358000}],&quot;total&quot;:121,&quot;size&quot;:10,&quot;current&quot;:1,&quot;orders&quot;:[],&quot;searchCount&quot;:true,&quot;pages&quot;:13},&quot;code&quot;:0}
+########### https://testapi.huxin315.com//cloud-service/api/merchant/myProject
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan0</td>
+          <td class="col-duration">0.12</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan0():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/merchant/myProject&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/json;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;{&quot;pageNum&quot;:1}&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:31: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/merchant/myProject
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan1</td>
+          <td class="col-duration">0.11</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan1():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/enterprise/selectByUser&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/json;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;{&quot;pageNum&quot;:1,&quot;authState&quot;:1}&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:65: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/enterprise/selectByUser
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan2</td>
+          <td class="col-duration">0.12</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan2():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/enterprise/selectByUser&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/json;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;{&quot;pageNum&quot;:2,&quot;authState&quot;:1}&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:99: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/enterprise/selectByUser
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan3</td>
+          <td class="col-duration">0.09</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan3():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/enterprise/selectByUser&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/json;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;{&quot;pageNum&quot;:3,&quot;authState&quot;:1}&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:133: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/enterprise/selectByUser
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan4</td>
+          <td class="col-duration">0.12</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan4():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/enterprise/selectByUser&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/json;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;{&quot;pageNum&quot;:4,&quot;authState&quot;:1}&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:167: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/enterprise/selectByUser
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan5</td>
+          <td class="col-duration">0.10</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan5():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/yfsAgreeGroup/optList&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/json;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;{&quot;entId&quot;:&quot;d946d4eb4c6662628ddb21f3ff10729f&quot;,&quot;corBusiness&quot;:0}&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:201: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/yfsAgreeGroup/optList
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan6</td>
+          <td class="col-duration">0.09</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan6():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/shop/selectShopByEntId&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/x-www-form-urlencoded;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;entId=d946d4eb4c6662628ddb21f3ff10729f&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:235: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/shop/selectShopByEntId
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan7</td>
+          <td class="col-duration">0.11</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan7():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/enterprise/selectEntById&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/x-www-form-urlencoded;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;entId=d946d4eb4c6662628ddb21f3ff10729f&amp;isPro=true&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:269: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/enterprise/selectEntById
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan8</td>
+          <td class="col-duration">0.09</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan8():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/yfsAgreement/queryInfo&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/x-www-form-urlencoded;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;argName=%E5%8F%91%E8%A1%8C%E8%AE%A1%E5%88%92%E6%89%BF%E8%AF%BA%E4%B9%A6&amp;entId=d946d4eb4c6662628ddb21f3ff10729f&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:303: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/yfsAgreement/queryInfo
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan9</td>
+          <td class="col-duration">0.11</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan9():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/comm/entTagInfo&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/x-www-form-urlencoded;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;entno=123456789014632748&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:337: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/comm/entTagInfo
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan10</td>
+          <td class="col-duration">0.09</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan10():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/merchant/insertProject&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/json;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;{&quot;yfsProject&quot;:{&quot;entId&quot;:&quot;d946d4eb4c6662628ddb21f3ff10729f&quot;,&quot;proName&quot;:&quot;【测试计划A】&quot;,&quot;startTime&quot;:1613577600000,&quot;endTime&quot;:1646063999000,&quot;serverStopTime&quot;:1646036784901,&quot;joinIns&quot;:true,&quot;isVoucher&quot;:false,&quot;isDis&quot;:false,&quot;prepaidLimit&quot;:&quot;10&quot;,&quot;consume&quot;:3,&quot;productForm&quot;:0,&quot;useScope&quot;:0,&quot;registered&quot;:0,&quot;phoneNumbers&quot;:&quot;jCOspwyLYVAJE9YCV9VXn0ORuLMSIgp/+84PI9Vs7umKHCl9wg/BebSeec/+I3Gb/U59SPVTGzRg8izgrwMSkvCIPAMRMlAkuXus/fBBVe3rT4Ayjltg0VitwBMTRlFyfvlTaGqGSH5QppBRr+Jq4GeW9sA/rfbIwd4vb5FXLDE=&quot;,&quot;verCode&quot;:&quot;000000&quot;,&quot;proAbstract&quot;:&quot;服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容服务内容&quot;,&quot;shopIds&quot;:[&quot;ebb6a3c3e82d13b73f97d3f0f224ce47&quot;],&quot;agrId&quot;:&quot;cf17a89f131a86b97ce329d34745fa10&quot;,&quot;totalPri&quot;:&quot;1000&quot;,&quot;lastUpdateTime&quot;:&quot;2021-02-18T14:31:36&quot;},&quot;verCode&quot;:&quot;000000&quot;}&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:371: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/merchant/insertProject
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan11</td>
+          <td class="col-duration">0.11</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan11():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/merchant/myProject&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/json;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;{&quot;pageNum&quot;:1}&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:405: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/merchant/myProject
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan12</td>
+          <td class="col-duration">0.09</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan12():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/project/queryInfo&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/x-www-form-urlencoded;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;id=11b372274353e8b803690b63de70fe88&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:439: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/project/queryInfo
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan13</td>
+          <td class="col-duration">0.10</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan13():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/merchant/queryByProNo&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/x-www-form-urlencoded;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;pageNum=1&amp;proNo=ee495b-2021-ef6b&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:473: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/merchant/queryByProNo
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan14</td>
+          <td class="col-duration">0.10</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan14():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/yfsSecurityRecord/list&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/json;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;{&quot;pageNum&quot;:1,&quot;busiIds&quot;:&quot;11b372274353e8b803690b63de70fe88&quot;,&quot;status&quot;:1}&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:507: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/yfsSecurityRecord/list
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan15</td>
+          <td class="col-duration">0.09</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan15():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/agreeGroup/queryInfo&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/x-www-form-urlencoded;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;id=cf17a89f131a86b97ce329d34745fa10&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:541: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/agreeGroup/queryInfo
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <th>发行计划</th>
+          <th>0</th>
+          <th></th>
+          <th></th>
+          <th></th>
+          <td class="col-name">test_dir/test_api2.py::test_test_issuance_plan16</td>
+          <td class="col-duration">0.08</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="9">
+            <div class="log">@pytest.mark.发行计划<br/>    def test_test_issuance_plan16():<br/>        &#x27;&#x27;&#x27;发行计划&#x27;&#x27;&#x27;<br/>        url = &quot;https://testapi.huxin315.com/cloud-service/api/enterprise/selectEntById&quot;<br/>        headers = {  # 设置http头部信息<br/>            &#x27;Host&#x27;: &#x27;testapi.huxin315.com&#x27;,<br/>            &#x27;Authorization&#x27;:&#x27;eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA&#x27;,<br/>            &#x27;Content-Type&#x27;: &#x27;application/x-www-form-urlencoded;charset=UTF-8&#x27;<br/>        }<br/>        params=&#x27;entId=d946d4eb4c6662628ddb21f3ff10729f&#x27;<br/>        send_request=interface(url,headers,params)<br/>        response=send_request.send_request()<br/>    <br/>        response_text=response.text<br/>        response_json=json.loads(response_text)<br/>        api_val.reponse = response_text<br/>        api_val.statue_code = response.status_code<br/>        api_val.url=url<br/>        api_val.request=params<br/>        print(response_text)<br/>        print(&quot;###########&quot;,api_val.url)<br/>    <br/>        msg = response_json[&quot;msg&quot;]<br/>        code = response_json[&quot;code&quot;]<br/>        code_str=str(code)<br/>    <br/>&gt;       assert response.status_code == 200<br/><span class="error">E       assert 401 == 200</span><br/><span class="error">E        +  where 401 = &lt;Response [401]&gt;.status_code</span><br/><br/>test_dir\test_api2.py:575: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&quot;msg&quot;:&quot;权限不足&quot;,&quot;code&quot;:401}
+########### https://testapi.huxin315.com/cloud-service/api/enterprise/selectEntById
+<br/></div></td></tr></tbody></table></body></html>

@@ -21,6 +21,8 @@ def test_test_issuance_plan0():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -53,6 +55,8 @@ def test_test_issuance_plan1():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -85,6 +89,8 @@ def test_test_issuance_plan2():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -117,6 +123,8 @@ def test_test_issuance_plan3():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -149,6 +157,8 @@ def test_test_issuance_plan4():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -181,6 +191,8 @@ def test_test_issuance_plan5():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -213,6 +225,8 @@ def test_test_issuance_plan6():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -245,6 +259,8 @@ def test_test_issuance_plan7():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -277,6 +293,8 @@ def test_test_issuance_plan8():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -309,6 +327,8 @@ def test_test_issuance_plan9():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -341,6 +361,8 @@ def test_test_issuance_plan10():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -373,6 +395,8 @@ def test_test_issuance_plan11():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -405,6 +429,8 @@ def test_test_issuance_plan12():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -437,6 +463,8 @@ def test_test_issuance_plan13():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -469,6 +497,8 @@ def test_test_issuance_plan14():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -501,6 +531,8 @@ def test_test_issuance_plan15():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]
@@ -533,6 +565,8 @@ def test_test_issuance_plan16():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
     msg = response_json["msg"]
     code = response_json["code"]

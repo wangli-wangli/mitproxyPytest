@@ -1,6 +1,7 @@
 import pytest
 import json
 from  sendRequest import interface
+
 from interface_parms import api_val
 
 
@@ -9,7 +10,7 @@ def test_api():
     url = "https://testapi.huxin315.com//cloud-service/api/merchant/myProject"
     headers = {  # 设置http头部信息
         'Host': 'testapi.huxin315.com',
-        'Authorization': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE2MTQyMzIwNjgsInVzZXJJZCI6Iklnbjd1aGZtcUV6ZkxsQmtoWENGNVI5cUc0c3lpWTNpU1dPWlpRbURENkkramJkY1FRTytBV3dUM2E2a1BVN1paTVlDc291aWhtSVlQZkdjcXlyZU9iTVNFK0UwRTlFM3ZodEMxeVBoa3IyN2hnc0crMEdudnBOcmdWOEYwMm5LZEd4dS9ZNGIxT1BTQ2F5aDEvZElRRmNyS1lCM3NvZzJKdHlHN0tBQjVsbz0iLCJpYXQiOjE2MTM2MjcyNjh9.nR7Zdx1UqiMef3ZelYNBFdqrXYHJrtSf2BvLFvWCUBwMgVHTBUzyNxiBlefJz2tspRInf4QVRH78UfEmxIhwwfy3B7v325mLYZnKTC1qfvG_U2P8l0JK_ew85yu5uDpUd1VijjpVUk4TXITmUmQlSInTm4YPjvSom0mVD-omOfqnk1k0gAXUGuNW6CFOERQs-ISrIm6k4P5BMvlDVUK9Z6RdDFNA5OddoU66ltTdhBo7PbGzhnzRJZ5T1Jiem4xvL3FtACCDRIlWcTj6MTXH4qrLAe6MwS9jpGYxSqRCHdYpAR6MqnNRAhtIkFhvKPiZnX5M0CFZlYPBYYPJfwGwmA',
+        'Authorization': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOjE3MDIyODc4NTMsInVzZXJJZCI6ImJtZnk1eGFhSU1uUkdQa3dvR0VXTkNITEhmeFkyUW8wL2sxN0NwWGRLQ3dzbmc3RVhhaHdBbWlnUG5FOWl5VkF2YTBrR2NpeVQ0VjJEYTh2U20rQndzc2lxeGhQNHZXT3RnYys2VnR4Wng5TXV1a3lua29WK3FoOWhEaklGSVN3dEF0T29EL1FIV04xTGV4QnhlTForbjhEaWI1NlZ5akhGUkwzZDhEU2hlST0iLCJpYXQiOjE2MTU5NzQyNTN9.vi-vY0wEVAll1MWTZ4A5G6KKkDbnEBuDB2qZkyGc6fBcq8CzUIQiK7H5WspcQOESVYV-od9a-6-BVxGPgJDGd5zreiT--dUWoOkZ7TCq8pShIaOj1nVafKBWkMEiT5UdO4Cojmb9P0Svnmp7KltZbx43fINH4cMgBDnpGZnpcjIS_u-9vQd3ld76a4cR_adrOmr8zcJ9wcndQetaqdNmQCfbjIRqMaEPzzP2HrvfIrrK7wbitrx7F0JA6zbAEbpaR2Oa0qj-_CFQjYeNYiST7vG0Dl7LhWOJHSST5hAl8DG5HXKoBK8s1CAt1TYWcfmyi-6sZBAN_Z4ti7S5yqc-Wg',
         'Content-Type': 'application/json;charset=UTF-8'
     }
     params={"pageNum":1}
@@ -22,6 +23,8 @@ def test_api():
     api_val.statue_code = response.status_code
     api_val.url=url
     api_val.request=params
+    print(response_text)
+    print("###########",api_val.url)
 
 
 
